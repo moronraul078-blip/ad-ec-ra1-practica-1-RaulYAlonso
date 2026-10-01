@@ -30,9 +30,11 @@ public class ProductoService {
             /*
             logic of calcule the productoEntity(precioFinal), as it is a BigDecimal the operators we know doesn't work
             so we need to use .add = +, .subtract = -, .multiply = * and .divide = /
+            we also save discount in another variable for performance
             */
-            pe.setPrecioFinal(p.getPrecio().subtract(p.getPrecio().multiply(p.getDescuento())
-                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
+            BigDecimal discount = (p.getPrecio().multiply(p.getDescuento())
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+            pe.setPrecioFinal(p.getPrecio().subtract(discount));
             pe.setCost(p.getCostes().getCostesEnvio().add(p.getCostes().getCostesAlmacenaje()));
             pe.setProfit(pe.getPrecioFinal().subtract(pe.getCost()));
             productos.add(pe);
