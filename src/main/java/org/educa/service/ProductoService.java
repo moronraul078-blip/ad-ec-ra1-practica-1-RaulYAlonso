@@ -14,9 +14,18 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service layer for the products inventory.
+ */
 public class ProductoService {
     ProductoDAO productoDAO = new ProductoDAOImpl();
 
+    /**
+     * method that read a List<Producto> to make a List<ProductoEntity>
+     * @param fileXml path to the XML file with the products
+     * @return list of {@link ProductoEntity} with the calculated values
+     * @throws JAXBException JAXB exception
+     */
     public List<ProductoEntity> readFile(String fileXml) throws JAXBException {
         //create the List which we will return
         List<ProductoEntity> productos = new ArrayList<>();
