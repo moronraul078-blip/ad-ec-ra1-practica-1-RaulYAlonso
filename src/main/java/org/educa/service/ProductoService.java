@@ -5,6 +5,7 @@ import jakarta.xml.bind.JAXBException;
 import org.educa.dao.ProductoDAO;
 import org.educa.dao.ProductoDAOImpl;
 import org.educa.entity.ProductoEntity;
+import org.educa.entity.SummaryEntity;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +46,35 @@ public class ProductoService {
     }
 
     public void exportSummary(String path, String fileXml) throws JAXBException, IOException {
-        //TODO: Implementar
+        List<ProductoEntity> productos = readFile(fileXml);
+
+        File originalFile = new File(fileXml);
+        String originalFileName = originalFile.getName();
+
+        String dateSuffix = originalFileName.replace("inventario_", "")
+                .replace(".xml","");
+
+        BigDecimal totalProfit = BigDecimal.ZERO;
+        for (ProductoEntity pe : productos) {
+            if (pe.getProfit() != null) {
+                totalProfit = totalProfit.add(pe.getProfit());
+            }
+        }
+
+        SummaryEntity summary = new SummaryEntity();
+        summary.setName(dateSuffix);
+        summary.setNumberOfProducts(productos.size());
+        summary.setTotalProfit(totalProfit);
+
+        summary.setFileAbsolutePath(originalFile.getAbsolutePath());
+        summary.setFileName(originalFileName);
+        summary.setFileSize(originalFile.length());
+
+        String resultFileName = "result_ " + dateSuffix + ".txt";
+        File exportDir = new File(path);
+        File resultFile = new File(exportDir, resultFileName);
+
+        productoDAO.exportSummary(resultFile, summary);
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
