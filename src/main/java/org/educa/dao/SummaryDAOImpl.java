@@ -10,11 +10,11 @@ public class SummaryDAOImpl implements SummaryDAO {
 
     @Override
     public void exportSummary(SummaryEntity summaryEntity, File f) throws IOException {
-        String nameSummary = "result_"+summaryEntity.getName()+".txt";
-        if (!f.exists()) {
-            f.mkdirs();
+        File parentDir = f.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
         }
-        File summaryFile = new File(f, nameSummary);
-        Files.writeString(summaryFile.toPath(), summaryEntity.toPrint());
+
+        Files.writeString(f.toPath(), summaryEntity.toPrint());
     }
 }

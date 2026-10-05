@@ -4,6 +4,8 @@ import generated.Producto;
 import jakarta.xml.bind.JAXBException;
 import org.educa.dao.ProductoDAO;
 import org.educa.dao.ProductoDAOImpl;
+import org.educa.dao.SummaryDAO;
+import org.educa.dao.SummaryDAOImpl;
 import org.educa.entity.ProductoEntity;
 import org.educa.entity.SummaryEntity;
 
@@ -20,6 +22,7 @@ import java.util.List;
  */
 public class ProductoService {
     ProductoDAO productoDAO = new ProductoDAOImpl();
+    SummaryDAO summaryDAO = new SummaryDAOImpl();
 
     /**
      * Method that reads a List<Producto> to make a List<ProductoEntity>
@@ -70,11 +73,11 @@ public class ProductoService {
         summary.setFileName(originalFileName);
         summary.setFileSize(originalFile.length());
 
-        String resultFileName = "result_ " + dateSuffix + ".txt";
+        String resultFileName = "result_" + dateSuffix + ".txt";
         File exportDir = new File(path);
         File resultFile = new File(exportDir, resultFileName);
 
-        productoDAO.exportSummary(resultFile, summary);
+        summaryDAO.exportSummary(summary, resultFile);
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
