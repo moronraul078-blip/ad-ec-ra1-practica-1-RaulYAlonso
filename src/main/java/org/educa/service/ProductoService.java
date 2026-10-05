@@ -21,42 +21,61 @@ public class ProductoService {
     ProductoDAO productoDAO = new ProductoDAOImpl();
 
     /**
-     * method that read a List<Producto> to make a List<ProductoEntity>
+     * Method that reads a List<Producto> to make a List<ProductoEntity>
+     *
      * @param fileXml path to the XML file with the products
      * @return list of {@link ProductoEntity} with the calculated values
      * @throws JAXBException JAXB exception
      */
     public List<ProductoEntity> readFile(String fileXml) throws JAXBException {
-        //create the List which we will return
+        // Create the List of ProductoEntity that we will return
         List<ProductoEntity> productos = new ArrayList<>();
         //create a file in base the String which is the route
         File file = new File(fileXml);
-        //make a List<Producto> to iterate it and making productoEntitys
+        //make a List<Producto> to save the iterations
         List<Producto> products = productoDAO.transformXML(file);
+
+        // Loop to cast Productos and make productoEntities
         for(Producto p : products){
-            ProductoEntity pe = new ProductoEntity();
-            pe.setProducto(p);
-            /*
-            logic of calcule the productoEntity(precioFinal), as it is a BigDecimal the operators we know doesn't work
-            so we need to use .add = +, .subtract = -, .multiply = * and .divide = /
-            we also save discount in another variable for performance
-            */
-            BigDecimal discount = (p.getPrecio().multiply(p.getDescuento())
-                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
-            pe.setPrecioFinal(p.getPrecio().subtract(discount));
-            pe.setCost(p.getCostes().getCostesEnvio().add(p.getCostes().getCostesAlmacenaje()));
-            pe.setProfit(pe.getPrecioFinal().subtract(pe.getCost()));
-            productos.add(pe);
+            productos.add(castToProductoEntity(p));
         }
+
+        //Returns the cast list
         return productos;
     }
 
     public void exportSummary(String path, String fileXml) throws JAXBException, IOException {
         //TODO: Implementar
-
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
         //TODO: Implementar
+    }
+
+    /**
+     * Casts the raw data from a {@link Producto} to a {@link ProductoEntity}
+     * applying all the math operations needed
+     *
+     * @param p Producto instance deserialized from the XML by the DAO
+     * @return ProductoEntity with the math operations done
+     */
+    private ProductoEntity castToProductoEntity (Producto p) {
+        ProductoEntity pe = new ProductoEntity();
+        pe.setProducto(p);
+
+        /*
+            Discounts:
+            As we are working with BigDecimal the operators we know doesn't work
+            so we need to use different ones: .add = +, .subtract = -, .multiply = * and .divide = /
+        */
+        BigDecimal discount = (p.getPrecio().multiply(p.getDescuento())
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+        pe.setPrecioFinal(p.getPrecio().subtract(discount));
+
+        // Total costs
+        pe.setCost(p.getCostes().getCostesEnvio().add(p.getCostes().getCostesAlmacenaje()));
+        pe.setProfit(pe.getPrecioFinal().subtract(pe.getCost()));
+
+        return pe;
     }
 }
