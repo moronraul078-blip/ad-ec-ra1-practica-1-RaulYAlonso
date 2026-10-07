@@ -7,5 +7,12 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ExcelDAO {
-    void exportExcel (List<ProductoEntity> productos, File originalFile) throws IOException;
+    /**
+     * Exports a list of {@link ProductoEntity} to a .xslx file.
+     *
+     * @param productos list of processed products
+     * @param targetFile destination file
+     * @throws IOException for mistakes while writing the file
+     */
+    void exportExcel (List<ProductoEntity> productos, File targetFile) throws IOException;
 }
