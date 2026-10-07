@@ -48,32 +48,21 @@ public class ProductoService {
         return productos;
     }
 
+    /**
+     * Exports the summary of the products read from the XML into a File object with plain text
+     *
+     * @param path target directory path where the summary file is saved
+     * @param fileXml path to source XML file with the products for the {@link readFile}
+     * @throws JAXBException parsing exception
+     * @throws IOException input or output exception when writing the file
+     */
     public void exportSummary(String path, String fileXml) throws JAXBException, IOException {
         List<ProductoEntity> productos = readFile(fileXml);
-
         File originalFile = new File(fileXml);
-        String originalFileName = originalFile.getName();
 
-        String dateSuffix = originalFileName.replace("inventario_", "")
-                .replace(".xml","");
+        SummaryEntity summary = builderSummaryEntity(productos, originalFile);
 
-        BigDecimal totalProfit = BigDecimal.ZERO;
-        for (ProductoEntity pe : productos) {
-            if (pe.getProfit() != null) {
-                totalProfit = totalProfit.add(pe.getProfit());
-            }
-        }
-
-        SummaryEntity summary = new SummaryEntity();
-        summary.setName(dateSuffix);
-        summary.setNumberOfProducts(productos.size());
-        summary.setTotalProfit(totalProfit);
-
-        summary.setFileAbsolutePath(originalFile.getAbsolutePath());
-        summary.setFileName(originalFileName);
-        summary.setFileSize(originalFile.length());
-
-        String resultFileName = "result_" + dateSuffix + ".txt";
+        String resultFileName = "result_" + summary.getName() + ".txt";
         File exportDir = new File(path);
         File resultFile = new File(exportDir, resultFileName);
 
@@ -109,5 +98,53 @@ public class ProductoService {
         pe.setProfit(pe.getPrecioFinal().subtract(pe.getCost()));
 
         return pe;
+    }
+
+    /**
+     * Builds a {@link SummaryEntity} setting all the calculated data
+     *
+     * @param productos list of {@link ProductoEntity}
+     * @param originalFile source XML {@link File} to get the data
+     * @return a {@link SummaryEntity} instance ready with all the data to export
+     */
+    private SummaryEntity builderSummaryEntity (List<ProductoEntity> productos, File originalFile) {
+        String dateSuffix = builderDateSuffix(originalFile.getName());
+        BigDecimal totalProfit = calculateTotalProfit(productos);
+
+        SummaryEntity summary = new SummaryEntity();
+        summary.setName(dateSuffix);
+        summary.setNumberOfProducts(productos.size());
+        summary.setTotalProfit(totalProfit);
+        summary.setFileAbsolutePath(originalFile.getAbsolutePath());
+        summary.setFileName(originalFile.getName());
+        summary.setFileSize(originalFile.length());
+
+        return summary;
+    }
+
+    /**
+     * Iterates the list of {@link ProductoEntity} to calculate the total profit
+     *
+     * @param productos list of {@link ProductoEntity} with all the profits
+     * @return calculated sum of all the profits as a {@link BigDecimal}
+     */
+    private BigDecimal calculateTotalProfit (List<ProductoEntity> productos) {
+        BigDecimal totalProfit = BigDecimal.ZERO;
+        for (ProductoEntity pe : productos) {
+            if (pe.getProfit() != null) {
+                totalProfit = totalProfit.add(pe.getProfit());
+            }
+        }
+        return totalProfit;
+    }
+
+    /**
+     * Extracts ONLY the date suffix from the XML file name
+     *
+     * @param fileName is the raw file name (e.g. inventario_junio2026.xml)
+     * @return date String (e.g. junio2026)
+     */
+    private String builderDateSuffix (String fileName) {
+        return fileName.replace("inventario_", "").replace(".xml","");
     }
 }
