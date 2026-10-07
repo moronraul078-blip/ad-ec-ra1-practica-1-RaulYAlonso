@@ -2,10 +2,7 @@ package org.educa.service;
 
 import generated.Producto;
 import jakarta.xml.bind.JAXBException;
-import org.educa.dao.ProductoDAO;
-import org.educa.dao.ProductoDAOImpl;
-import org.educa.dao.SummaryDAO;
-import org.educa.dao.SummaryDAOImpl;
+import org.educa.dao.*;
 import org.educa.entity.ProductoEntity;
 import org.educa.entity.SummaryEntity;
 
@@ -23,6 +20,7 @@ import java.util.List;
 public class ProductoService {
     ProductoDAO productoDAO = new ProductoDAOImpl();
     SummaryDAO summaryDAO = new SummaryDAOImpl();
+    ExcelDAO excelDAO = new ExcelDAOImpl();
 
     /**
      * Method that reads a List<Producto> to make a List<ProductoEntity>
@@ -52,7 +50,7 @@ public class ProductoService {
      * Exports the summary of the products read from the XML into a File object with plain text
      *
      * @param path target directory path where the summary file is saved
-     * @param fileXml path to source XML file with the products for the {@link readFile}
+     * @param fileXml path to source XML file with the products for the readFile
      * @throws JAXBException parsing exception
      * @throws IOException input or output exception when writing the file
      */
@@ -70,7 +68,12 @@ public class ProductoService {
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
-        //TODO: Implementar
+        List<ProductoEntity> productos = readFile(fileXml);
+
+        String resultFileName = "export_" + builderDateSuffix(new File(fileXml).getName()) + ".xlsx";
+        File resultFile = new File(path, resultFileName);
+
+        excelDAO.exportExcel(productos, resultFile);
     }
 
     /**
