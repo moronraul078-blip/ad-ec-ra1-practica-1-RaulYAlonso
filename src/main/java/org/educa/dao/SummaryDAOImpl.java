@@ -11,8 +11,9 @@ public class SummaryDAOImpl implements SummaryDAO {
     @Override
     public void exportSummary(SummaryEntity summaryEntity, File f) throws IOException {
         File parentDir = f.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
+
+        if (parentDir != null) {
+            Files.createDirectories(parentDir.toPath());
         }
 
         Files.writeString(f.toPath(), summaryEntity.toPrint());
