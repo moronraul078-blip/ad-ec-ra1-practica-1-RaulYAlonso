@@ -1,8 +1,8 @@
-# ad-ec-ra1-practica-1-RaulYAlonso 🚀
+# ad-ec-ra1-practica-1-RaulYAlonso 
 
 Our first real Java project! Made by two DAM students for the **Acceso a Datos** module (RA1 – file handling).
 
-The idea: read product data from XML, process it, and export the results as a text summary and as Excel files. We're learning a lot along the way (and breaking a few things too 😅).
+The idea: read product data from XML, process it, and export the results as a text summary and as Excel files. We're learning a lot along the way (and breaking a few things too ).
 
 ## What does it do?
 
