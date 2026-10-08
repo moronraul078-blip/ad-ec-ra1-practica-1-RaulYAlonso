@@ -1,12 +1,6 @@
 package org.educa.dao;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.educa.entity.ProductoEntity;
 import org.educa.util.ExcelUtils;
@@ -30,7 +24,6 @@ public class ExcelDAOImpl implements ExcelDAO {
             "Costes\nAlmacenaje",
             "Beneficio"
     };
-
     private static final String CURRENCY_FORMAT = "#,##0.00 €";
     private static final String PERCENT_FORMAT = "0.00%";
 
@@ -40,28 +33,10 @@ public class ExcelDAOImpl implements ExcelDAO {
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Inventario");
+            ExcelStyles styles = new ExcelStyles(workbook);
 
-            CellStyle headerStyle = ExcelUtils.createHeaderStyle(workbook);
-
-            CellStyle codeStyle = ExcelUtils.createDataStyle(
-                    workbook, IndexedColors.LIGHT_GREEN, null, true, HorizontalAlignment.CENTER);
-            CellStyle serieStyle = ExcelUtils.createDataStyle(
-                    workbook, IndexedColors.LIGHT_GREEN, null, false, HorizontalAlignment.LEFT);
-
-            CellStyle currencyGreen = ExcelUtils.createDataStyle(
-                    workbook, IndexedColors.LIGHT_GREEN, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
-            CellStyle percentGreen = ExcelUtils.createDataStyle(
-                    workbook, IndexedColors.LIGHT_GREEN, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
-
-            CellStyle currencyWhite = ExcelUtils.createDataStyle(
-                    workbook, IndexedColors.WHITE, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
-            CellStyle percentWhite = ExcelUtils.createDataStyle(
-                    workbook, IndexedColors.WHITE, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
-
-            createHeaders(sheet, headerStyle);
-            populateDataRows(sheet, productos, codeStyle, serieStyle,
-                    currencyGreen, percentGreen, currencyWhite, percentWhite);
-
+            createHeaders(sheet, styles.header);
+            populateDataRows(sheet, productos, styles);
             autoSizeColumns(sheet);
 
             try (FileOutputStream fos = new FileOutputStream(targetFile)) {
@@ -83,39 +58,27 @@ public class ExcelDAOImpl implements ExcelDAO {
         }
     }
 
-    private void populateDataRows(Sheet sheet, List<ProductoEntity> productos,
-                                  CellStyle codeStyle, CellStyle serieStyle,
-                                  CellStyle currencyGreen, CellStyle percentGreen,
-                                  CellStyle currencyWhite, CellStyle percentWhite) {
+    private void populateDataRows(Sheet sheet, List<ProductoEntity> productos, ExcelStyles styles) {
         int rowIndex = 1;
         for (ProductoEntity pe : productos) {
             Row row = sheet.createRow(rowIndex);
-
-            boolean isGreenRow = (rowIndex % 2 != 0);
-            CellStyle currentCurrencyStyle = isGreenRow ? currencyGreen : currencyWhite;
-            CellStyle currentPercentStyle = isGreenRow ? percentGreen : percentWhite;
-
-            createProductRow(row, pe, codeStyle, serieStyle, currentCurrencyStyle, currentPercentStyle);
+            createProductRow(row, pe, styles, rowIndex);
             rowIndex++;
         }
     }
 
-    private void createProductRow(Row row, ProductoEntity pe,
-                                  CellStyle codeStyle, CellStyle serieStyle,
-                                  CellStyle currencyStyle, CellStyle percentStyle) {
+    private void createProductRow(Row row, ProductoEntity pe, ExcelStyles styles, int rowIndex) {
+        boolean isGreen = (rowIndex % 2 != 0);
+        CellStyle currencyStyle = isGreen ? styles.currencyGreen : styles.currencyWhite;
+        CellStyle percentStyle = isGreen ? styles.percentGreen : styles.percentWhite;
 
-        createCell(row, 0, pe.getProducto().getCodigo(), codeStyle);
-
-        createCell(row, 1, pe.getProducto().getNumeroSerie(), serieStyle);
-
+        createCell(row, 0, pe.getProducto().getCodigo(), styles.code);
+        createCell(row, 1, pe.getProducto().getNumeroSerie(), styles.serie);
         createCell(row, 2, pe.getProducto().getPrecio(), currencyStyle);
 
         BigDecimal descuento = pe.getProducto().getDescuento();
-        if (descuento != null) {
-            createCell(row, 3, descuento.doubleValue() / 100.0, percentStyle);
-        } else {
-            createCell(row, 3, (Double) null, percentStyle);
-        }
+        Double descValue = (descuento != null) ? descuento.doubleValue() / 100.0 : null;
+        createCell(row, 3, descValue, percentStyle);
 
         createCell(row, 4, pe.getPrecioFinal(), currencyStyle);
 
@@ -155,5 +118,25 @@ public class ExcelDAOImpl implements ExcelDAO {
             cell.setCellValue(value);
         }
         cell.setCellStyle(style);
+    }
+
+    private static class ExcelStyles {
+        final CellStyle header;
+        final CellStyle code;
+        final CellStyle serie;
+        final CellStyle currencyGreen;
+        final CellStyle percentGreen;
+        final CellStyle currencyWhite;
+        final CellStyle percentWhite;
+
+        ExcelStyles(Workbook workbook) {
+            this.header = ExcelUtils.createHeaderStyle(workbook);
+            this.code = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, true, HorizontalAlignment.CENTER);
+            this.serie = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, false, HorizontalAlignment.LEFT);
+            this.currencyGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
+            this.percentGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
+            this.currencyWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
+            this.percentWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
+        }
     }
 }
