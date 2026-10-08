@@ -19,7 +19,7 @@ public class ExcelDAOImpl implements ExcelDAO {
 
     // Column headers for the Excel table
     private static final String[] HEADERS = {
-            "Codigo",
+            "Código",
             "Número de\nSerie",
             "Precio",
             "Descuento",
