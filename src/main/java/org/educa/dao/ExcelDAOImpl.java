@@ -93,6 +93,8 @@ public class ExcelDAOImpl implements ExcelDAO {
     private void autoSizeColumns(Sheet sheet) {
         for (int i = 0; i < HEADERS.length; i++) {
             sheet.autoSizeColumn(i);
+            // Margen extra de 4 caracteres para evitar saltos indeseados
+            sheet.setColumnWidth(i, sheet.getColumnWidth(i) + 1024);
         }
     }
 
