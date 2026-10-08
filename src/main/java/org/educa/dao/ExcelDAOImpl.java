@@ -69,7 +69,6 @@ public class ExcelDAOImpl implements ExcelDAO {
     }
 
     private void createProductRow(Row row, ProductoEntity pe, ExcelStyles styles, int rowIndex) {
-        // La fila 1 es verde (impar), la fila 2 es blanca (par)
         boolean isGreen = (rowIndex % 2 != 0);
 
         CellStyle codeStyle = isGreen ? styles.codeGreen : styles.codeWhite;
@@ -140,19 +139,15 @@ public class ExcelDAOImpl implements ExcelDAO {
         ExcelStyles(Workbook workbook) {
             this.header = ExcelUtils.createHeaderStyle(workbook);
 
-            // Col 0: Codigo (Negrita, Centrado)
             this.codeGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, true, HorizontalAlignment.CENTER);
             this.codeWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, null, true, HorizontalAlignment.CENTER);
 
-            // Col 1: Número de Serie (Normal, Izquierda)
             this.serieGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, false, HorizontalAlignment.LEFT);
             this.serieWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, null, false, HorizontalAlignment.LEFT);
 
-            // Moneda (€)
             this.currencyGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
             this.currencyWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
 
-            // Porcentaje (%)
             this.percentGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
             this.percentWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
         }
