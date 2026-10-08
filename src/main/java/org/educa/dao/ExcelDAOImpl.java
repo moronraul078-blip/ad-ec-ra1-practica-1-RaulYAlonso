@@ -24,6 +24,7 @@ public class ExcelDAOImpl implements ExcelDAO {
             "Costes\nAlmacenaje",
             "Beneficio"
     };
+
     private static final String CURRENCY_FORMAT = "#,##0.00 €";
     private static final String PERCENT_FORMAT = "0.00%";
 
@@ -68,12 +69,16 @@ public class ExcelDAOImpl implements ExcelDAO {
     }
 
     private void createProductRow(Row row, ProductoEntity pe, ExcelStyles styles, int rowIndex) {
+        // La fila 1 es verde (impar), la fila 2 es blanca (par)
         boolean isGreen = (rowIndex % 2 != 0);
+
+        CellStyle codeStyle = isGreen ? styles.codeGreen : styles.codeWhite;
+        CellStyle serieStyle = isGreen ? styles.serieGreen : styles.serieWhite;
         CellStyle currencyStyle = isGreen ? styles.currencyGreen : styles.currencyWhite;
         CellStyle percentStyle = isGreen ? styles.percentGreen : styles.percentWhite;
 
-        createCell(row, 0, pe.getProducto().getCodigo(), styles.code);
-        createCell(row, 1, pe.getProducto().getNumeroSerie(), styles.serie);
+        createCell(row, 0, pe.getProducto().getCodigo(), codeStyle);
+        createCell(row, 1, pe.getProducto().getNumeroSerie(), serieStyle);
         createCell(row, 2, pe.getProducto().getPrecio(), currencyStyle);
 
         BigDecimal descuento = pe.getProducto().getDescuento();
@@ -93,7 +98,6 @@ public class ExcelDAOImpl implements ExcelDAO {
     private void autoSizeColumns(Sheet sheet) {
         for (int i = 0; i < HEADERS.length; i++) {
             sheet.autoSizeColumn(i);
-            // Margen extra de 4 caracteres para evitar saltos indeseados
             sheet.setColumnWidth(i, sheet.getColumnWidth(i) + 1024);
         }
     }
@@ -124,20 +128,32 @@ public class ExcelDAOImpl implements ExcelDAO {
 
     private static class ExcelStyles {
         final CellStyle header;
-        final CellStyle code;
-        final CellStyle serie;
+        final CellStyle codeGreen;
+        final CellStyle codeWhite;
+        final CellStyle serieGreen;
+        final CellStyle serieWhite;
         final CellStyle currencyGreen;
-        final CellStyle percentGreen;
         final CellStyle currencyWhite;
+        final CellStyle percentGreen;
         final CellStyle percentWhite;
 
         ExcelStyles(Workbook workbook) {
             this.header = ExcelUtils.createHeaderStyle(workbook);
-            this.code = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, true, HorizontalAlignment.CENTER);
-            this.serie = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, false, HorizontalAlignment.LEFT);
+
+            // Col 0: Codigo (Negrita, Centrado)
+            this.codeGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, true, HorizontalAlignment.CENTER);
+            this.codeWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, null, true, HorizontalAlignment.CENTER);
+
+            // Col 1: Número de Serie (Normal, Izquierda)
+            this.serieGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, null, false, HorizontalAlignment.LEFT);
+            this.serieWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, null, false, HorizontalAlignment.LEFT);
+
+            // Moneda (€)
             this.currencyGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
-            this.percentGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
             this.currencyWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, CURRENCY_FORMAT, false, HorizontalAlignment.RIGHT);
+
+            // Porcentaje (%)
+            this.percentGreen = ExcelUtils.createDataStyle(workbook, IndexedColors.LIGHT_GREEN, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
             this.percentWhite = ExcelUtils.createDataStyle(workbook, IndexedColors.WHITE, PERCENT_FORMAT, false, HorizontalAlignment.RIGHT);
         }
     }

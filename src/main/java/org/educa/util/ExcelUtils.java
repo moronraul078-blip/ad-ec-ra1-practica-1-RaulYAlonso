@@ -67,20 +67,19 @@ public class ExcelUtils {
         style.setAlignment(alignment);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
 
-        // Bordes verdes finos (según la captura del examen)
-        short greenColor = IndexedColors.GREEN.getIndex();
+        short greenIndex = IndexedColors.GREEN.getIndex();
 
         style.setBorderTop(BorderStyle.THIN);
-        style.setTopBorderColor(greenColor);
+        style.setTopBorderColor(greenIndex);
 
         style.setBorderBottom(BorderStyle.THIN);
-        style.setBottomBorderColor(greenColor);
+        style.setBottomBorderColor(greenIndex);
 
         style.setBorderLeft(BorderStyle.THIN);
-        style.setLeftBorderColor(greenColor);
+        style.setLeftBorderColor(greenIndex);
 
         style.setBorderRight(BorderStyle.THIN);
-        style.setRightBorderColor(greenColor);
+        style.setRightBorderColor(greenIndex);
 
         return style;
     }
