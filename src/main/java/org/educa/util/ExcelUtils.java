@@ -11,7 +11,7 @@ public class ExcelUtils {
     }
 
     /**
-     * Creates the style used for header cells: grey background, bold text, centered and with text wrapping
+     * Creates the style used for header cells
      *
      * @param workbook {@link Workbook} the style will belong to
      * @return header {@link CellStyle} ready to be applied to a cell
